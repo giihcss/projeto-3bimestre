@@ -45,6 +45,45 @@ app.get("/usuarios", async (_req, res) => {
   }
 });
 
+// PUT /usuarios/:id - Atualiza um usuário
+app.put("/usuarios/:id", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const usuario = await prisma.user.update({
+      where: { id: Number(req.params.id) },
+      data: { 
+        name,
+        email,
+        password
+      }
+    });
+    res.json(usuario);
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+    if (error.code === "P2002") {
+      return res.status(409).json({ error: "E-mail já cadastrado" });
+    }
+    res.status(500).json({ error: "Erro ao atualizar usuário" });
+  }
+});
+
+// DELETE /usuarios/:id - Remove um usuário
+app.delete("/usuarios/:id", async (req, res) => {
+  try {
+    await prisma.user.delete({
+      where: { id: Number(req.params.id) }
+    });
+    res.status(204).end();
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+    res.status(500).json({ error: "Erro ao deletar usuário" });
+  }
+});
+
 // POST /stores body: { name, userId }
 app.post('/stores', async (req, res) => {
   try {
