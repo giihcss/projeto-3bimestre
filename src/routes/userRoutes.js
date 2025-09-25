@@ -1,30 +1,10 @@
-// Importar as bibliotecas necessárias
 import express from "express";
-import dotenv from "dotenv";
-import prisma from "./db.js"; // Importar nossa conexão com o banco
+import prisma from "../db.js";
 
-// Importar as rotas
-import productRoutes from "./routes/productRoutes.js";
-import storeRoutes from "./routes/storeRoutes.js";
-
-// Carregar variáveis de ambiente do arquivo .env
-dotenv.config();
-
-// Criar aplicação Express
-const app = express();
-
-// Middleware para processar JSON nas requisições
-app.use(express.json());
-
-// Usar as rotas
-app.use('/products', productRoutes);
-app.use('/stores', storeRoutes);
-
-//Healthcheck
-app.get("/", (_req, res) => res.json({ ok: true, service: "API 3º Bimestre" }));
+const router = express.Router();
 
 //CREATE: POST /usuarios
-app.post("/usuarios", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const novoUsuario = await prisma.user.create({
@@ -42,7 +22,7 @@ app.post("/usuarios", async (req, res) => {
 });
 
 //READ: GET /usuarios
-app.get("/usuarios", async (_req, res) => {
+router.get("/", async (_req, res) => {
   try {
     const usuarios = await prisma.user.findMany({
       orderBy: { id: "asc" }
@@ -54,7 +34,7 @@ app.get("/usuarios", async (_req, res) => {
 });
 
 // PUT /usuarios/:id - Atualiza um usuário
-app.put("/usuarios/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const usuario = await prisma.user.update({
@@ -78,7 +58,7 @@ app.put("/usuarios/:id", async (req, res) => {
 });
 
 // DELETE /usuarios/:id - Remove um usuário
-app.delete("/usuarios/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await prisma.user.delete({
       where: { id: Number(req.params.id) }
@@ -92,13 +72,4 @@ app.delete("/usuarios/:id", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
-
-//ROTA DE TESTE
-app.get("/status", (req, res) => {
-  res.json({ message: "API Online" });
-});
-
+export default router;
